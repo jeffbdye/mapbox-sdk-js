@@ -33,16 +33,52 @@ describe('createUploadCredentials', () => {
 describe('createUpload', () => {
   test('works', () => {
     uploads.createUpload({
-      mapId: 'tilted_towers',
-      url: 'mapbox://datasets/kushan2020/cio5g309a004eusknialll02g',
-      tilesetName: 'dusty_devote'
+      tileset: 'username.nameoftileset',
+      url: 'http://{bucket}.s3.amazonaws.com/{key}',
+      name: 'dusty_devote'
+    });
+
+    expect(tu.requestConfig(uploads)).toEqual({
+      path: '/uploads/v1/:ownerId',
+      method: 'POST',
+      body: {
+        tileset: 'username.nameoftileset',
+        url: 'http://{bucket}.s3.amazonaws.com/{key}',
+        name: 'dusty_devote'
+      }
+    });
+  });
+
+  test('defaults values', () => {
+    uploads.createUpload({
+      tileset: 'username.nameoftileset',
+      name: 'disty_devote',
+      url: 'http://{bucket}.s3.amazonaws.com/{key}'
     });
     expect(tu.requestConfig(uploads)).toEqual({
       path: '/uploads/v1/:ownerId',
       method: 'POST',
       body: {
+        tileset: 'username.nameoftileset',
+        url: 'http://{bucket}.s3.amazonaws.com/{key}',
+        name: 'disty_devote'
+      }
+    });
+  });
+
+  test('backwards compatibility', () => {
+    uploads.createUpload({
+      mapId: 'tilted_towers',
+      tilesetName: 'dusty_devote',
+      url: 'http://{bucket}.s3.amazonaws.com/{key}'
+    });
+
+    expect(tu.requestConfig(uploads)).toEqual({
+      path: '/uploads/v1/:ownerId',
+      method: 'POST',
+      body: {
         tileset: 'tilted_towers',
-        url: 'mapbox://datasets/kushan2020/cio5g309a004eusknialll02g',
+        url: 'http://{bucket}.s3.amazonaws.com/{key}',
         name: 'dusty_devote'
       }
     });

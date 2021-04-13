@@ -21,8 +21,9 @@ var Styles = {};
  * @param {Object} config
  * @param {string} config.styleId
  * @param {string} [config.ownerId]
- * @param {boolean} [config.metadata] - If true, `mapbox:` specific metadata will be preserved
+ * @param {boolean} [config.metadata=false] - If true, `mapbox:` specific metadata will be preserved
  * @param {boolean} [config.draft=false] - If `true` will retrieve the draft style, otherwise will retrieve the published style.
+ * @param {boolean} [config.fresh=false] - If `true`, will bypass the cached version of the style. Fresh style requests have a lower rate limit than cached requests and may have a higher latency. `fresh=true` should never be used in production or high concurrency environments.
  * @return {MapiRequest}
  *
  * @example
@@ -39,12 +40,16 @@ Styles.getStyle = function(config) {
     styleId: v.required(v.string),
     ownerId: v.string,
     metadata: v.boolean,
-    draft: v.boolean
+    draft: v.boolean,
+    fresh: v.boolean
   })(config);
 
   var query = {};
   if (config.metadata) {
     query.metadata = config.metadata;
+  }
+  if (config.fresh) {
+    query.fresh = 'true';
   }
 
   return this.client.createRequest({
@@ -184,6 +189,7 @@ Styles.deleteStyle = function(config) {
  * @param {Object} [config]
  * @param {string} [config.start] - The style ID to start at, for paginated results.
  * @param {string} [config.ownerId]
+ * @param {boolean} [config.fresh=false] - If `true`, will bypass the cached resource. Fresh requests have a lower rate limit than cached requests and may have a higher latency. `fresh=true` should never be used in high concurrency environments.
  * @return {MapiRequest}
  *
  * @example
@@ -197,12 +203,16 @@ Styles.listStyles = function(config) {
   config = config || {};
   v.assertShape({
     start: v.string,
-    ownerId: v.string
+    ownerId: v.string,
+    fresh: v.boolean
   })(config);
 
   var query = {};
   if (config.start) {
     query.start = config.start;
+  }
+  if (config.fresh) {
+    query.fresh = 'true';
   }
   return this.client.createRequest({
     method: 'GET',
@@ -301,6 +311,7 @@ Styles.deleteStyleIcon = function(config) {
  *   resolution.
  * @param {string} [config.ownerId]
  * @param {boolean} [config.draft=false] - If `true` will retrieve the draft style sprite, otherwise will retrieve the published style sprite.
+ * @param {boolean} [config.fresh=false] - If `true`, will bypass the cached resource. Fresh requests have a lower rate limit than cached requests and may have a higher latency. `fresh=true` should never be used in high concurrency environments.
  * @return {MapiRequest}
  *
  * @example
@@ -332,18 +343,28 @@ Styles.getStyleSprite = function(config) {
     format: v.oneOf('json', 'png'),
     highRes: v.boolean,
     ownerId: v.string,
-    draft: v.boolean
+    draft: v.boolean,
+    fresh: v.boolean
   })(config);
 
   var format = config.format || 'json';
   var fileName = '/sprite' + (config.highRes ? '@2x' : '') + '.' + format;
 
+  var query = {};
+  if (config.fresh) {
+    query.fresh = 'true';
+  }
+
   return this.client.createRequest(
     xtend(
       {
         method: 'GET',
-        path: '/styles/v1/:ownerId/:styleId' + (config.draft ? '/draft' : '') + fileName,
-        params: pick(config, ['ownerId', 'styleId'])
+        path:
+          '/styles/v1/:ownerId/:styleId' +
+          (config.draft ? '/draft' : '') +
+          fileName,
+        params: pick(config, ['ownerId', 'styleId']),
+        query: query
       },
       format === 'png' ? { encoding: 'binary' } : {}
     )
@@ -406,6 +427,9 @@ Styles.getFontGlyphRange = function(config) {
  *   be disabled.
  * @param {boolean} [config.title=false] - If `true`, the map's title and owner is displayed
  *   in the upper right corner of the map.
+ * @param {boolean} [config.fallback=false] - If `true`, serve a fallback raster map.
+ * @param {string} [config.mapboxGLVersion] - Specify a version of [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/) to use to render the map.
+ * @param {string} [config.mapboxGLGeocoderVersion] - Specify a version of the [Mapbox GL geocoder plugin](https://github.com/mapbox/mapbox-gl-geocoder) to use to render the map search box.
  * @param {string} [config.ownerId]
  * @param {boolean} [config.draft=false] - If `true` will retrieve the draft style, otherwise will retrieve the published style.
  */
@@ -414,6 +438,9 @@ Styles.getEmbeddableHtml = function(config) {
     styleId: v.required(v.string),
     scrollZoom: v.boolean,
     title: v.boolean,
+    fallback: v.boolean,
+    mapboxGLVersion: v.string,
+    mapboxGLGeocoderVersion: v.string,
     ownerId: v.string,
     draft: v.boolean
   })(config);
@@ -425,6 +452,15 @@ Styles.getEmbeddableHtml = function(config) {
   }
   if (config.title !== undefined) {
     query.title = String(config.title);
+  }
+  if (config.fallback !== undefined) {
+    query.fallback = String(config.fallback);
+  }
+  if (config.mapboxGLVersion !== undefined) {
+    query.mapboxGLVersion = String(config.mapboxGLVersion);
+  }
+  if (config.mapboxGLGeocoderVersion !== undefined) {
+    query.mapboxGLGeocoderVersion = String(config.mapboxGLGeocoderVersion);
   }
 
   return this.client.createRequest({

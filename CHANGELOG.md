@@ -1,8 +1,38 @@
 # Changelog
 
-## Master
+## 0.12.1
 
+- **PATCH:** [remove unsupported `private` option](https://github.com/mapbox/mapbox-sdk-js/pull/405) from `createUpload`.   
+
+## 0.12.0
+
+- **Add:** add `bounding box` parameter as a position option for `Static#getStaticImage.`
+- **Add:** add `padding`  optional parameter for `Static#getStaticImage`.
+
+## 0.11.0
+
+- **Add:** add `fresh` parameter to `Styles#getStyle` to bypass the cached version of the style.
+- **Add:** add `routing` parameter to `Geocoding#forwardGeocode` and `Geocoding#reverseGeocoding`.
+- **Add:** add `driving-traffic` profile to `Optimization#getOptimization`.
+- **Add:** add `sortby` parameter to `Datasets#listDatasets`.
+- **Add:** add `Tilesets#updateTileset`.
+- **Add:** add `fallback`, `mapboxGLVersion` and `mapboxGLGeocoderVersion` to `Styles#getEmbeddableHtml`.
+- **Add:** add pagination support to `Tilesets#listTilesetJobs` and `Tilesets#listTilesetSources`.
+- **Breaking change:** `Uploads#createUpload`'s `mapId` parameter is now `tileset`, and `tilesetName` is now `name` to be consistent across the API. `mapId` and `tilesetName` are deprecated, but will still work and may be removed in a future release.
+- **Add:** add `private` option to `Uploads#createUpload`.
+- **Fix:** fixed an issue where array parameters containing falsy values (e.g. for the `proximity` parameter in `forwardGeocode`, where longitude or latitude coordinates are 0) were not being applied correctly.
+
+## 0.10.0
+
+- **Add:** add new parameters to `Tilesets#listTilesets`: `type`, `limit`, `sortBy`, `start` and `visibility`.
+- **Add:** add `Tilesets#tileJSONMetadata` method to retrieve a Tileset TileJSON metadata.
+- **Add:** add new `metadata` parameter to `Styles#getStyle` to preserve `mapbox:` specific metadata from the style.
+- **Add:** add new Tilesets methods `deleteTileset`, `createTilesetSource`, `getTilesetSource`, `listTilesetSources`, `deleteTilesetSource`, `createTileset`, `publishTileset`, `tilesetStatus`, `tilesetJob`, `listTilesetJobs`, `getTilesetsQueue`, `validateRecipe`, `getRecipe`, `updateRecipe`.
+- **Add:** add new `draft` parameter to `Styles#getStyle`, `Styles#deleteStyleIcon` and `Styles#getStyleSprite`, `Styles#getEmbeddableHtml` to work with draft styles.
+- **Fix:** Fix responses containing binary data when using `Static#getStaticImage`, `Styles#getStyleSprite` and `Styles#getFontGlyphRange`.
+- **Fix:** Fix requests for highres sprites in `Styles#getStyleSprite`.
 - **Fix:** set `position.bearing` to `0` if `position.pitch` is defined and `position.bearing` is not in the Static API.
+- **Fix:** use `tilesets.getRecipe` in tilesets API example.
 
 ## 0.9.0
 
